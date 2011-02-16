@@ -2,7 +2,7 @@
 export OUTPUTDIR=${PWD}/out/target/product/overo/
 
 # add busybox
-cp busybox ${OUTPUTDIR}/system/bin/
+cp ${PWD}/utils/busybox ${OUTPUTDIR}/system/bin/
 #./busybox --install will overwrite
 # edit init.rc to point console service to this shell
 
