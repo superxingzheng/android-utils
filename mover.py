@@ -6,14 +6,15 @@ import shutil
 import grp
 
 date = datetime.date.today().isoformat() + '-'
-dir = tempfile.mkdtemp(prefix=date, dir="/var/www/Android")
-os.chmod(dir, 0775)
+dest_dir = tempfile.mkdtemp(prefix=date, dir="/var/www/Android")
+os.chmod(dest_dir, 0775)
 gid = grp.getgrnam("web").gr_gid
-os.chown(dir, -1, gid)
+os.chown(dest_dir, -1, gid)
 
-shutil.copy(os.path.join(os.getcwd(), "uImage"), dir)
-shutil.copy(os.path.join(os.getcwd(), "MLO"), dir)
-shutil.copy(os.path.join(os.getcwd(), "u-boot.bin"), dir)
-shutil.copy(os.path.join(os.getcwd(), "boot.scr"), dir)
-shutil.copy(os.path.join(os.getcwd(), "rootfs.tar.bz2"), dir)
+src_dir = os.path.join(os.getcwd(), "out/target/product/overo")
+shutil.copy(os.path.join(src_dir, "uImage"), dest_dir)
+shutil.copy(os.path.join(src_dir, "MLO"), dest_dir)
+shutil.copy(os.path.join(src_dir, "u-boot.bin"), dest_dir)
+shutil.copy(os.path.join(src_dir, "boot.scr"), dest_dir)
+shutil.copy(os.path.join(src_dir, "rootfs.tar.bz2"), dest_dir)
 
