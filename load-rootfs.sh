@@ -1,6 +1,7 @@
 #!/bin/bash
 
 #MNTROOTFS=/media/rootfs
+ORIG_PWD=${PWD}
 TARDIR=${PWD}/out/target/product/overo/
 
 #echo "Clean old rootfs on SD"
@@ -22,5 +23,5 @@ echo "make tarball"
 #echo "sync"
 #sync
 #sync
-cd ${PWD}
+cd ${ORIG_PWD}
 echo "DONE!"
