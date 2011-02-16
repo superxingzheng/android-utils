@@ -1,8 +1,7 @@
 #!/bin/bash
 
-PWDIR=`pwd`
 MNTROOTFS=/media/rootfs
-TARDIR=/home/ash/Android/rowboat-android/out/target/product/overo/
+TARDIR=${PWD}/out/target/product/overo/
 
 echo "Clean old rootfs on SD"
 sudo rm -rf ${MNTROOTFS}/*
@@ -23,5 +22,5 @@ sudo tar xaf rootfs.tar.bz2 --numeric-owner -C ${MNTROOTFS}
 echo "sync"
 sync
 sync
-cd ${PWDIR}
+cd ${PWD}
 echo "DONE!"

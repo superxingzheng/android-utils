@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 # rather fragile but...
 export PATH=${PWD}/prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin:$PATH
@@ -18,7 +18,7 @@ cd ..
 cd kernel
 make mrproper
 make overo_android_defconfig
-make -j4
+make -j4 uImage
 cp arch/arm/boot/uImage ${OUTPUTDIR}
 cd ..
 
