@@ -24,7 +24,7 @@ cp mlo/x-load.bin.ift ${OUTPUTDIR}/MLO
 # Build u-boot
 make -C uboot distclean
 make -C uboot omap3_overo_config
-make -j${THREADS}
+make -C uboot -j${THREADS}
 cp uboot/u-boot.bin ${OUTPUTDIR}
 
 # Build boot.scr
