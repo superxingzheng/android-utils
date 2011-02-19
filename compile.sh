@@ -1,34 +1,40 @@
 #!/bin/bash
 
-# rather fragile but...
-export PATH=${PWD}/prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin:$PATH
+# Clean and compile MLO, uboot, boot.scr, kernel, and SGX
+
+# this is rather fragile but provides a handy shortcut for
+# a fresh build.  In other cases, we should just use the
+# individual build systems as designed.
+if ! `which arm-eabi-gcc &> /dev/null`; then
+    export PATH=${PWD}/prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin:$PATH
+fi
 export ARCH=arm
 export CROSS_COMPILE=arm-eabi-
 export OUTPUTDIR=${PWD}/out/target/product/overo
-
-# Build u-boot
-cd uboot
-make distclean
-make omap3_overo_config
-make -j4
-cp u-boot.bin ${OUTPUTDIR}
-cd ..
-
-# Build kernel
-cd kernel
-make mrproper
-make overo_android_defconfig
-make -j4 uImage
-cp arch/arm/boot/uImage ${OUTPUTDIR}
-cd ..
+export THREADS=4
 
 # Build MLO
-cd mlo
-make distclean
-make overo_config
-make -j4
-gcc scripts/signGP.c -o signGP
-./signGP x-load.bin 0x40200800
-cp x-load.bin.ift ${OUTPUTDIR}/MLO
-cd ..
+make -C mlo distclean
+make -C mlo overo_config
+make -C mlo
+gcc mlo/scripts/signGP.c -o mlo/signGP
+mlo/signGP mlo/x-load.bin 0x40200800
+cp mlo/x-load.bin.ift ${OUTPUTDIR}/MLO
 
+# Build u-boot
+make -C uboot distclean
+make -C uboot omap3_overo_config
+make -j${THREADS}
+cp uboot/u-boot.bin ${OUTPUTDIR}
+
+# Build boot.scr
+source utils/mkscr.sh
+
+# Build kernel
+make -C kernel mrproper
+make -C kernel overo_android_defconfig
+make -C kernel uImage -j${THREADS}
+cp kernel/arch/arm/boot/uImage ${OUTPUTDIR}
+
+# Build SGX
+make -C external/ti_android_sgx_sdk OMAPES="3.x" ANDROID_ROOT_DIR=${PWD} TOOLS_PREFIX="prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin/arm-eabi-" TARGET_PRODUCT="overo"
