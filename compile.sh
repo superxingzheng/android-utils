@@ -29,6 +29,12 @@ cp uboot/u-boot.bin ${OUTPUTDIR}
 
 # Build boot.scr
 source utils/mkscr.sh
+# add busybox
+cp ${PWD}/utils/busybox ${OUTPUTDIR}/system/bin/
+#./busybox --install will overwrite
+# edit init.rc to point console service to this shell
+# add vim
+tar -zxf ${PWD}/utils/vim-android.tar.gz -C ${OUTPUTDIR}
 
 # Build kernel
 make -C kernel mrproper
@@ -38,3 +44,4 @@ cp kernel/arch/arm/boot/uImage ${OUTPUTDIR}
 
 # Build SGX
 make -C external/ti_android_sgx_sdk OMAPES="3.x" ANDROID_ROOT_DIR=${PWD} TOOLS_PREFIX="prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin/arm-eabi-" TARGET_PRODUCT="overo"
+
