@@ -1,10 +1,10 @@
 #!/bin/bash
 # taken from rowboat packaging script
 
-OUTDIR="../out/target/product/overo"
+OUTDIR="out/target/product/overo"
 EXPECTED_ARGS=1
 if [ $# == $EXPECTED_ARGS ]; then
-	echo "Assuming Default Locations for Prebuilt Images"
+	echo "Assuming Default ($OUTDIR) Locations for Prebuilt Images"
 	$0 $1 ${OUTDIR}/MLO ${OUTDIR}/u-boot.bin ${OUTDIR}/uImage ${OUTDIR}/boot.scr ${OUTDIR}/rootfs.tar.bz2 ${OUTDIR}/Media 
 	exit
 fi
@@ -12,7 +12,7 @@ fi
 if [[ -z $1 || -z $2 || -z $3 || -z $4 ]]; then
 	echo "$0 Usage:"
 	echo "	$0 <device> <MLO> <u-boot.bin> <uImage> <boot.scr> <rootfs tar.bz2> [Media Folder]"
-	echo "	Example: mkmmc-android /dev/mmcblk0 MLO u-boot.bin uImage boot.scr rootfs.tar.bz2 Media/"
+	echo "	Example: mkandroidsd.sh /dev/mmcblk0 MLO u-boot.bin uImage boot.scr rootfs.tar.bz2 Media/"
 	exit
 fi
 
