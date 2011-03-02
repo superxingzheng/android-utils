@@ -1,10 +1,11 @@
 #!/bin/bash
 # taken from rowboat packaging script
 
+OUTDIR="../out/target/product/overo"
 EXPECTED_ARGS=1
 if [ $# == $EXPECTED_ARGS ]; then
 	echo "Assuming Default Locations for Prebuilt Images"
-	$0 $1 MLO u-boot.bin uImage boot.scr rootfs.tar.bz2 Media 
+	$0 $1 ${OUTDIR}/MLO ${OUTDIR}/u-boot.bin ${OUTDIR}/uImage ${OUTDIR}/boot.scr ${OUTDIR}/rootfs.tar.bz2 ${OUTDIR}/Media 
 	exit
 fi
 
