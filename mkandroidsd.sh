@@ -6,8 +6,8 @@ OUTDIR="out/target/product/overo"
 MLO="MLO"
 UBOOT="u-boot.bin"
 KERNEL="uImage"
-SCRIPT="boot.scr"
 ROOTFS="rootfs.tar.bz2"
+SCRIPT="boot.scr"
 MEDIA="Media"
 
 #==== JUST CODE HERE :) ===
@@ -21,8 +21,8 @@ fi
 if [[ -z $1 || -z $2 ]]; then
         echo "This utility creates a bootable microSD card given a set of files."
         echo "These file names are expected:"
-        echo "  ${MLO}, ${UBOOT}, ${KERNEL}, ${SCRIPT}, ${ROOTFS} and, optionally,"
-        echo -e "  a ${MEDIA} directory.\n"
+        echo "  ${MLO}, ${UBOOT}, ${KERNEL}, ${ROOTFS} and, optionally,"
+        echo -e "  ${SCRIPT} and a ${MEDIA} directory.\n"
 	echo "Usage:"
 	echo "	$0 <device> [path to files]"
 	echo "Example:"
@@ -41,10 +41,6 @@ if ! [[ -e ${OUTDIR}/${UBOOT} ]]; then
 fi
 if ! [[ -e ${OUTDIR}/${KERNEL} ]]; then
 	echo "No ${KERNEL} found! Quitting..."
-	exit
-fi
-if ! [[ -e ${OUTDIR}/${SCRIPT} ]]; then
-	echo "No ${SCRIPT} found! Quitting..."
 	exit
 fi
 if ! [[ -e ${OUTDIR}/${ROOTFS} ]]; then
@@ -66,7 +62,7 @@ umount $1p1 &> /dev/null
 umount $1p2 &> /dev/null
 umount $1p3 &> /dev/null
 
-# Cyliders are approx. 8MB each
+# Cylinders are approx. 8MB each (8225280 bytes to be precise)
 echo "[Partitioning $1...]"
 DRIVE=$1
 dd if=/dev/zero of=$DRIVE bs=1024 count=1024 &>/dev/null
@@ -91,7 +87,9 @@ fi
 cp ${OUTDIR}/${MLO} /mnt/MLO
 cp ${OUTDIR}/${UBOOT} /mnt/u-boot.bin
 cp ${OUTDIR}/${KERNEL} /mnt/uImage
-cp ${OUTDIR}/${SCRIPT} /mnt/boot.scr
+if [[ -e ${OUTDIR}/${SCRIPT} ]]; then
+    cp ${OUTDIR}/${SCRIPT} /mnt/boot.scr
+fi
 umount /mnt
 
 echo "[Making rootfs partition...]"
@@ -105,16 +103,16 @@ fi
 tar jxvf ${OUTDIR}/${ROOTFS} -C /mnt &> /dev/null
 umount /mnt
 
-if [[ -e ${OUTDIR}/${MEDIA} ]]; then
-    echo "[Copying all media to data partition]"
-    if [ -b ${1}3 ]; then
-        mkfs.vfat -F 32 -n data "$1"3 &> /dev/null
-        mount "$1"3 /mnt
-    else
-        mkfs.vfat -F 32 -n data "$1"p3 &> /dev/null
-        mount "$1"p3 /mnt
-    fi
-    cp -r ${OUTDIR}/${MEDIA}/* /mnt
-    umount /mnt
+echo "[Making data partition]"
+if [ -b ${1}3 ]; then
+    mkfs.vfat -F 32 -n data "$1"3 &> /dev/null
+    mount "$1"3 /mnt
+else
+    mkfs.vfat -F 32 -n data "$1"p3 &> /dev/null
+    mount "$1"p3 /mnt
 fi
+if [[ -e ${OUTDIR}/${MEDIA}/* ]]; then
+    cp -r ${OUTDIR}/${MEDIA}/* /mnt
+fi
+umount /mnt
 echo "[Done]"
