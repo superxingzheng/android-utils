@@ -1,39 +1,54 @@
 #!/bin/bash
 # taken from rowboat packaging script
 
+#=== MODIFY ME ===
 OUTDIR="out/target/product/overo"
+MLO="MLO"
+UBOOT="u-boot.bin"
+KERNEL="uImage"
+SCRIPT="boot.scr"
+ROOTFS="rootfs.tar.bz2"
+MEDIA="Media"
+
+#==== JUST CODE HERE :) ===
 EXPECTED_ARGS=1
 if [ $# == $EXPECTED_ARGS ]; then
-	echo "Assuming Default ($OUTDIR) Locations for Prebuilt Images"
-	$0 $1 ${OUTDIR}/MLO ${OUTDIR}/u-boot.bin ${OUTDIR}/uImage ${OUTDIR}/boot.scr ${OUTDIR}/rootfs.tar.bz2 ${OUTDIR}/Media 
+	echo "Assuming images found in ${OUTDIR}."
+	$0 $1 ${OUTDIR}
 	exit
 fi
 
-if [[ -z $1 || -z $2 || -z $3 || -z $4 ]]; then
-	echo "$0 Usage:"
-	echo "	$0 <device> <MLO> <u-boot.bin> <uImage> <boot.scr> <rootfs tar.bz2> [Media Folder]"
-	echo "	Example: mkandroidsd.sh /dev/mmcblk0 MLO u-boot.bin uImage boot.scr rootfs.tar.bz2 Media/"
+if [[ -z $1 || -z $2 ]]; then
+        echo "This utility creates a bootable microSD card given a set of files."
+        echo "These file names are expected:"
+        echo "  ${MLO}, ${UBOOT}, ${KERNEL}, ${SCRIPT}, ${ROOTFS} and, optionally,"
+        echo -e "  a ${MEDIA} directory.\n"
+	echo "Usage:"
+	echo "	$0 <device> [path to files]"
+	echo "Example:"
+	echo "	sudo mkandroidsd.sh /dev/mmcblk0 out/target/product/overo"
 	exit
 fi
+OUTDIR=$2
 
-if ! [[ -e $2 ]]; then
-	echo "No MLO found! Quitting..."
+if ! [[ -e ${OUTDIR}/${MLO} ]]; then
+	echo "No ${MLO} found! Quitting..."
 	exit
 fi
-if ! [[ -e $3 ]]; then
-	echo "No u-boot.bin found! Quitting..."
+if ! [[ -e ${OUTDIR}/${UBOOT} ]]; then
+	echo "No ${UBOOT} found! Quitting..."
 	exit
 fi
-if ! [[ -e $4 ]]; then
-	echo "No uImage found! Quitting..."
+if ! [[ -e ${OUTDIR}/${KERNEL} ]]; then
+	echo "No ${KERNEL} found! Quitting..."
 	exit
 fi
-if ! [[ -e $5 ]]; then
-	echo "No boot.scr found! Quitting..."
+if ! [[ -e ${OUTDIR}/${SCRIPT} ]]; then
+	echo "No ${SCRIPT} found! Quitting..."
 	exit
 fi
-if ! [[ -e $6 ]]; then
-	echo "No rootfs.tar.bz2 found! Quitting..."
+if ! [[ -e ${OUTDIR}/${ROOTFS} ]]; then
+	echo "No ${ROOTFS} found! Quitting..."
 	exit
 fi
 
@@ -72,10 +87,10 @@ else
     mkfs.vfat -F 32 -n boot "$1"p1 &> /dev/null
     mount "$1"p1 /mnt
 fi
-cp $2 /mnt/MLO
-cp $3 /mnt/u-boot.bin
-cp $4 /mnt/uImage
-cp $5 /mnt/boot.scr
+cp ${OUTDIR}/${MLO} /mnt/MLO
+cp ${OUTDIR}/${UBOOT} /mnt/u-boot.bin
+cp ${OUTDIR}/${KERNEL} /mnt/uImage
+cp ${OUTDIR}/${SCRIPT} /mnt/boot.scr
 umount /mnt
 
 echo "[Making rootfs partition...]"
@@ -86,10 +101,10 @@ else
     mkfs.ext3 -L rootfs "$1"p2 &> /dev/null
     mount "$1"p2 /mnt
 fi
-tar jxvf $6 -C /mnt &> /dev/null
+tar jxvf ${OUTDIR}/${ROOTFS} -C /mnt &> /dev/null
 umount /mnt
 
-if [ "$7" ]; then
+if [[ -e "${OUTDIR}/${MEDIA}" ]]; then
     echo "[Copying all media to data partition]"
     if [ -b ${1}3 ]; then
         mkfs.vfat -F 32 -n data "$1"3 &> /dev/null
@@ -98,7 +113,7 @@ if [ "$7" ]; then
         mkfs.vfat -F 32 -n data "$1"p3 &> /dev/null
         mount "$1"p3 /mnt
     fi
-    cp -r $7/* /mnt
+    cp -r ${OUTDIR}/${MEDIA}/* /mnt
     umount /mnt
 fi
 echo "[Done]"
