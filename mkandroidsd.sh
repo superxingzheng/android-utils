@@ -66,6 +66,7 @@ umount $1p1 &> /dev/null
 umount $1p2 &> /dev/null
 umount $1p3 &> /dev/null
 
+# Cyliders are approx. 8MB each
 echo "[Partitioning $1...]"
 DRIVE=$1
 dd if=/dev/zero of=$DRIVE bs=1024 count=1024 &>/dev/null
@@ -75,7 +76,7 @@ CYLINDERS=`echo $SIZE/255/63/512 | bc`
 echo CYLINDERS - $CYLINDERS
 {
 echo ,9,0x0C,*
-echo ,$(expr $CYLINDERS / 2),,-
+echo ,120,,-
 echo ,,0x0C,-
 } | sfdisk -D -H 255 -S 63 -C $CYLINDERS $DRIVE &> /dev/null
 
@@ -104,7 +105,7 @@ fi
 tar jxvf ${OUTDIR}/${ROOTFS} -C /mnt &> /dev/null
 umount /mnt
 
-if [[ -e "${OUTDIR}/${MEDIA}" ]]; then
+if [[ -e ${OUTDIR}/${MEDIA} ]]; then
     echo "[Copying all media to data partition]"
     if [ -b ${1}3 ]; then
         mkfs.vfat -F 32 -n data "$1"3 &> /dev/null
