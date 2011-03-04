@@ -4,17 +4,76 @@ import tempfile
 import os
 import shutil
 import grp
+import hashlib
+import PyRSS2Gen
 
-date = datetime.date.today().isoformat() + '-'
-dest_dir = tempfile.mkdtemp(prefix=date, dir="/var/www/Android")
-os.chmod(dest_dir, 0775)
-gid = grp.getgrnam("web").gr_gid
-os.chown(dest_dir, -1, gid)
+SRCDIR = os.path.join(os.getcwd(), "out/target/product/overo")
+FILES = ["MLO","u-boot.bin", "boot.scr", "uImage", "rootfs.tar.bz2"]
+DESTDIR = "/var/www/images/android"
 
-src_dir = os.path.join(os.getcwd(), "out/target/product/overo")
-shutil.copy(os.path.join(src_dir, "uImage"), dest_dir)
-shutil.copy(os.path.join(src_dir, "MLO"), dest_dir)
-shutil.copy(os.path.join(src_dir, "u-boot.bin"), dest_dir)
-shutil.copy(os.path.join(src_dir, "boot.scr"), dest_dir)
-shutil.copy(os.path.join(src_dir, "rootfs.tar.bz2"), dest_dir)
+def md5sum(filename):
+    """Return the md5 hexdigest of a file given the file name."""
+    with open(filename, "r") as fin:
+        md5sum = hashlib.md5()
+        for line in fin.readlines():
+            md5sum.update(line)
+        return md5sum.hexdigest()
+
+def mkdir():
+    """Make a fresh directory below DESTDIR with appropriate permissions.
+       Folder is named with today's date plus a random string."""
+    date = datetime.date.today().isoformat() + '-'
+    new_dir = tempfile.mkdtemp(prefix=date, dir=DESTDIR)
+    os.chmod(new_dir, 0775)
+    gid = grp.getgrnam("web").gr_gid
+    os.chown(new_dir, -1, gid)
+    return os.path.basename(new_dir)
+
+def updatecurrent(dir_name):
+    """Update the 'current' symlink to point to the freshly populated one."""
+    # we test both in case a non-symbolic file named 'current' exists or
+    # the existing symlink is broken
+    target = os.path.join(DESTDIR, 'current')
+    if os.path.islink(target) or os.path.exists(target):
+        os.remove(target)
+    os.symlink(os.path.join(DEST_DIR, dir_name), target)
+
+def updatefeed(dir_name):
+    """Write latest data to Gumdroid Builder RSS Feed."""
+    rss = PyRSS2Gen.RSS2(
+        title = "Gumdroid Builder feed",
+        link = "http://cumulus.gumstix.org/images/android/",
+        description = "Feed summarizing most recent Android builds"
+                  "for Gumstix Overo COMs.",
+        lastBuildDate = datetime.datetime.utcnow(),
+        items = [PyRSS2Gen.RSSItem(
+            title = "Android Build " + dir_name,
+            link = "http://cumulus.gumstix.org/images/android/" + dir_name,
+            description = "The most recent Android build for Overo",
+            guid = PyRSS2Gen.Guid("http://cumulus.gumstix.org/images/android/"+ dir_name),
+            pubDate = datetime.datetime.utcnow(),
+        )]
+    )
+    rss.write_xml(open(os.path.join(DESTDIR,"feed.xml", "w")))
+
+def populate():
+    """Copy FILES from SRCDIR to DESTDIR and prepare them for web hosting.
+       This is the main entry point."""
+    target = mkdir()
+    md5sums = ''
+    for item in FILES:
+        full_item = os.path.join(SRCDIR, item)
+        shutils.copy(item, target)
+        md5sums += item + '\t' + md5sum(full_item) + '\n'
+    with open(os.path.join(DESTDIR,"md5sums.txt", "w")) as fout:
+        fout.write(md5sums)
+    updatecurrent(target)
+    updatefeed(target)
+
+if __name__ == "__main__":
+   populate()
+
+
+
+
 
