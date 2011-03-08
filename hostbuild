@@ -36,7 +36,7 @@ def updatecurrent(dir_name):
     target = os.path.join(DESTDIR, 'current')
     if os.path.islink(target) or os.path.exists(target):
         os.remove(target)
-    os.symlink(os.path.join(DEST_DIR, dir_name), target)
+    os.symlink(os.path.join(DESTDIR, dir_name), target)
 
 def updatefeed(dir_name):
     """Write latest data to Gumdroid Builder RSS Feed."""
@@ -54,18 +54,19 @@ def updatefeed(dir_name):
             pubDate = datetime.datetime.utcnow(),
         )]
     )
-    rss.write_xml(open(os.path.join(DESTDIR,"feed.xml", "w")))
+    rss.write_xml(open(os.path.join(DESTDIR,"feed.xml"), "w"))
 
 def populate():
     """Copy FILES from SRCDIR to DESTDIR and prepare them for web hosting.
        This is the main entry point."""
     target = mkdir()
+    full_target = os.path.join(DESTDIR, target)
     md5sums = ''
     for item in FILES:
         full_item = os.path.join(SRCDIR, item)
-        shutils.copy(item, target)
-        md5sums += item + '\t' + md5sum(full_item) + '\n'
-    with open(os.path.join(DESTDIR,"md5sums.txt", "w")) as fout:
+        shutil.copy(full_item, full_target)
+        md5sums += md5sum(full_item) + '  ' + item + '\n'
+    with open(os.path.join(full_target, "md5sums.txt"), "w") as fout:
         fout.write(md5sums)
     updatecurrent(target)
     updatefeed(target)
