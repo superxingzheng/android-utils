@@ -28,7 +28,7 @@ make -C uboot -j${THREADS}
 cp uboot/u-boot.bin ${OUTPUTDIR}
 
 # Build boot.scr
-source utils/mkscr.sh
+source ${PWD}/utils/mkscript
 # add busybox
 cp ${PWD}/utils/busybox ${OUTPUTDIR}/system/bin/
 #./busybox --install will overwrite
