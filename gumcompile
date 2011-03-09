@@ -19,7 +19,10 @@ make -C mlo overo_config
 make -C mlo
 gcc mlo/scripts/signGP.c -o mlo/signGP
 mlo/signGP mlo/x-load.bin 0x40200800
-cp mlo/x-load.bin.ift ${OUTPUTDIR}/MLO
+#cp mlo/x-load.bin.ift ${OUTPUTDIR}/MLO
+# The Android cross-compiler and x-loader don't currently like each other.
+# We're just going to use a pre-built binary for now.
+cp utils/MLO ${OUTPUTDIR}/MLO
 
 # Build u-boot
 make -C uboot distclean
