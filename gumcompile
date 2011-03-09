@@ -43,5 +43,6 @@ make -C kernel uImage -j${THREADS}
 cp kernel/arch/arm/boot/uImage ${OUTPUTDIR}
 
 # Build SGX
-make -C external/ti_android_sgx_sdk OMAPES="3.x" ANDROID_ROOT_DIR=${PWD} TOOLS_PREFIX="prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin/arm-eabi-" TARGET_PRODUCT="overo"
+python utils/autoinstall.py
+#make -C external/ti_android_sgx_sdk OMAPES="3.x" ANDROID_ROOT_DIR=${PWD} TOOLS_PREFIX="prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin/arm-eabi-" TARGET_PRODUCT="overo"
 
