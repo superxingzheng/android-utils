@@ -65,6 +65,7 @@ def populate():
     for item in FILES:
         full_item = os.path.join(SRCDIR, item)
         shutil.copy(full_item, full_target)
+        os.chmod(os.path.join(full_target, item), 0644)
         md5sums += md5sum(full_item) + '  ' + item + '\n'
     with open(os.path.join(full_target, "md5sums.txt"), "w") as fout:
         fout.write(md5sums)
