@@ -32,7 +32,7 @@ cp uboot/u-boot.bin ${OUTPUTDIR}
 
 # Build boot.scr
 source ${PWD}/utils/mkscript
-mv ${PWD}/boot.scr ${OTUPUTDIR}
+mv ${PWD}/boot.scr ${OUTPUTDIR}
 # add busybox
 cp ${PWD}/utils/busybox ${OUTPUTDIR}/system/bin/
 #./busybox --install will overwrite
