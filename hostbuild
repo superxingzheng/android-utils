@@ -69,6 +69,7 @@ def populate():
         md5sums += md5sum(full_item) + '  ' + item + '\n'
     with open(os.path.join(full_target, "md5sums.txt"), "w") as fout:
         fout.write(md5sums)
+    os.chmod(os.path.join(full_target, "md5sums.txt"), 0644)
     updatecurrent(target)
     updatefeed(target)
 
