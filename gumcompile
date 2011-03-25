@@ -5,9 +5,7 @@
 # this is rather fragile but provides a handy shortcut for
 # a fresh build.  In other cases, we should just use the
 # individual build systems as designed.
-if ! `which arm-eabi-gcc &> /dev/null`; then
-    export PATH=${PWD}/prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin:$PATH
-fi
+export PATH=${PWD}/prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin:$PATH
 export ARCH=arm
 export CROSS_COMPILE=arm-eabi-
 export OUTPUTDIR=${PWD}/out/target/product/overo
