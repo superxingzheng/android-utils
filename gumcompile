@@ -12,21 +12,22 @@ export OUTPUTDIR=${PWD}/out/target/product/overo
 export THREADS=4
 
 # Build MLO
-make -C mlo distclean
-make -C mlo overo_config
-make -C mlo
-gcc mlo/scripts/signGP.c -o mlo/signGP
-mlo/signGP mlo/x-load.bin 0x40200800
+#make -C mlo distclean
+#make -C mlo overo_config
+#make -C mlo
+#gcc mlo/scripts/signGP.c -o mlo/signGP
+#mlo/signGP mlo/x-load.bin 0x40200800
 #cp mlo/x-load.bin.ift ${OUTPUTDIR}/MLO
 # The Android cross-compiler and x-loader don't currently like each other.
 # We're just going to use a pre-built binary for now.
 cp utils/MLO ${OUTPUTDIR}/MLO
 
 # Build u-boot
-make -C uboot distclean
-make -C uboot omap3_overo_config
-make -C uboot -j${THREADS}
-cp uboot/u-boot.bin ${OUTPUTDIR}
+#make -C uboot distclean
+#make -C uboot omap3_overo_config
+#make -C uboot -j${THREADS}
+#cp uboot/u-boot.bin ${OUTPUTDIR}
+cp utils/u-boot.bin ${OUTPUTDIR}/u-boot.bin
 
 # Build boot.scr
 source ${PWD}/utils/mkscript
@@ -43,6 +44,8 @@ make -C kernel mrproper
 make -C kernel overo_android_defconfig
 make -C kernel uImage -j${THREADS}
 cp kernel/arch/arm/boot/uImage ${OUTPUTDIR}
+make -C kernel modules
+cp kernel/drivers/net/wireless/libertas/libertas_sdio.ko ${OUTPUTDIR}/system/lib/modules/
 
 # Build SGX
 python utils/autoinstall.py
