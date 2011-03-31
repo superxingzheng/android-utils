@@ -36,8 +36,6 @@ def prepare():
     child.sendline('Y')
     child.expect("-- Press space to continue or 'q' to quit --")
     child.sendline('q')
-    child.expect("Do you agree to the licensing terms")
-    child.sendline('Y')
     child.expect("Where do you want to install")
     child.sendline(DESTDIR)
     child.expect(pexpect.EOF, timeout=120)
