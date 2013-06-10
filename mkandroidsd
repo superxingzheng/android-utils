@@ -4,9 +4,10 @@
 #=== MODIFY ME ===
 OUTDIR="out/target/product/overo"
 MLO="MLO"
-UBOOT="u-boot.bin"
+UBOOT="u-boot.img"
+UINITRD="uInitrd"
 KERNEL="uImage"
-ROOTFS="rootfs.tar.bz2"
+SYSTEM="system.tar.bz2"
 SCRIPT="boot.scr"
 MEDIA="Media"
 
@@ -43,8 +44,8 @@ if ! [[ -e ${OUTDIR}/${KERNEL} ]]; then
 	echo "No ${KERNEL} found! Quitting..."
 	exit
 fi
-if ! [[ -e ${OUTDIR}/${ROOTFS} ]]; then
-	echo "No ${ROOTFS} found! Quitting..."
+if ! [[ -e ${OUTDIR}/${SYSTEM} ]]; then
+	echo "No ${SYSTEM} found! Quitting..."
 	exit
 fi
 
@@ -73,6 +74,9 @@ echo CYLINDERS - $CYLINDERS
 {
 echo ,9,0x0C,*
 echo ,120,,-
+echo ,120,,-
+echo ,,E,-
+echo ,120,L,-
 echo ,,0x0C,-
 } | sfdisk -D -H 255 -S 63 -C $CYLINDERS $DRIVE &> /dev/null
 
@@ -87,20 +91,22 @@ fi
 cp ${OUTDIR}/${MLO} /mnt/MLO
 cp ${OUTDIR}/${UBOOT} /mnt/u-boot.bin
 cp ${OUTDIR}/${KERNEL} /mnt/uImage
+cp ${OUTDIR}/${UINITRD} /mnt/uInitrd
 if [[ -e ${OUTDIR}/${SCRIPT} ]]; then
     cp ${OUTDIR}/${SCRIPT} /mnt/boot.scr
 fi
 umount /mnt
 
-echo "[Making rootfs partition...]"
+echo "[Making system partition...]"
 if [ -b ${1}2 ]; then
-    mkfs.ext3 -L rootfs "$1"2 &> /dev/null
+    mkfs.ext3 -L system "$1"2 &> /dev/null
     mount "$1"2 /mnt
 else
-    mkfs.ext3 -L rootfs "$1"p2 &> /dev/null
+    mkfs.ext3 -L system "$1"p2 &> /dev/null
     mount "$1"p2 /mnt
 fi
-tar jxvf ${OUTDIR}/${ROOTFS} -C /mnt &> /dev/null
+tar jxvf ${OUTDIR}/${SYSTEM} --strip-components=1 -C /mnt &> /dev/null
+sync
 umount /mnt
 
 echo "[Making data partition]"
@@ -114,5 +120,31 @@ fi
 if [[ -e ${OUTDIR}/${MEDIA}/* ]]; then
     cp -r ${OUTDIR}/${MEDIA}/* /mnt
 fi
+sync
 umount /mnt
+echo "[Making cache partition...]"
+if [ -b ${1}5 ]; then
+    mkfs.ext3 -L cache "$1"5 &> /dev/null
+    mount "$1"5 /mnt
+else
+    mkfs.ext3 -L cache "$1"p5 &> /dev/null
+    mount "$1"p5 /mnt
+fi
+sync
+umount /mnt
+
+echo "[Making sdcard partition]"
+if [ -b ${1}6 ]; then
+    mkfs.vfat -F 32 -n sdcard "$1"6 &> /dev/null
+    mount "$1"6 /mnt
+else
+    mkfs.vfat -F 32 -n sdcard "$1"p6 &> /dev/null
+    mount "$1"p6 /mnt
+fi
+if [[ -e ${OUTDIR}/${MEDIA}/* ]]; then
+    cp -r ${OUTDIR}/${MEDIA}/* /mnt
+fi
+sync
+umount /mnt
+
 echo "[Done]"
