@@ -27,17 +27,17 @@ cp utils/MLO ${OUTPUTDIR}/MLO
 #make -C uboot omap3_overo_config
 #make -C uboot -j${THREADS}
 #cp uboot/u-boot.bin ${OUTPUTDIR}
-cp utils/u-boot.bin ${OUTPUTDIR}/u-boot.bin
+cp utils/u-boot.img ${OUTPUTDIR}/u-boot.img
 
 # Build boot.scr
 source ${PWD}/utils/mkscript
 mv ${PWD}/boot.scr ${OUTPUTDIR}
 # add busybox
-cp ${PWD}/utils/busybox ${OUTPUTDIR}/system/bin/
+# cp ${PWD}/utils/busybox ${OUTPUTDIR}/system/bin/
 #./busybox --install will overwrite
 # edit init.rc to point console service to this shell
 # add vim
-tar -zxf ${PWD}/utils/vim-android.tar.gz -C ${OUTPUTDIR}
+# tar -zxf ${PWD}/utils/vim-android.tar.gz -C ${OUTPUTDIR}
 
 # Build kernel
 make -C kernel mrproper
@@ -48,6 +48,6 @@ make -C kernel modules
 cp kernel/drivers/net/wireless/libertas/libertas_sdio.ko ${OUTPUTDIR}/system/lib/modules/
 
 # Build SGX
-python utils/autoinstall.py
+# python utils/autoinstall.py
 #make -C external/ti_android_sgx_sdk OMAPES="3.x" ANDROID_ROOT_DIR=${PWD} TOOLS_PREFIX="prebuilt/linux-x86/toolchain/arm-eabi-4.4.0/bin/arm-eabi-" TARGET_PRODUCT="overo"
 
